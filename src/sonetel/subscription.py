@@ -4,12 +4,12 @@ import requests
 # Create a phone number subscription
 def buy_number(token: str = None, base_url: str = None, accountid: str = None, number=None) -> dict:
     """
-    Buy a phone number available for purchase.
+    Buy a phone number that is available for purchase based on the /availablephonenumber API endpoint.
     :param token: API access token generated using the token() function.
     :param base_url: The API base URL.
     :param accountid: Your Sonetel account ID.
     :param number: the phone number to add to your account.
-    :return: JSON response in case of success.
+    :return: Dict containing the response in case of success.
     """
     if number is None:
         raise ValueError(number)
@@ -46,7 +46,7 @@ def list_all_numbers(token: str = None, base_url: str = None, accountid: str = N
     :param token: API access token generated using the token() function.
     :param base_url: The API base URL.
     :param accountid: Your Sonetel account ID.
-    :return:
+    :return: Returns a dict containing the response from the API.
     """
     if base_url is None:
         raise ValueError(base_url)

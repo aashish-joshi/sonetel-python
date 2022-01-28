@@ -7,7 +7,7 @@
 <h3 align="center">Sonetel API</h3>
 
 <p align="center">
-    Python package to provide easy access to different Sonetel API endpoints.
+    A simple wrapper for using Sonetel's REST API endpoints.
     <br />
     <br />
     <a href="https://sonetel.com/en/developer/" target="_blank">Sonetel Developer Home</a>
@@ -20,16 +20,30 @@
 
 ### Get a Sonetel account
 
-You need an account with Sonetel to use this Python package. Sign up for a free account from <a href="https://app.sonetel.com/register?tag=api-developer&simple=true">sonetel.com</a>.
+Sign up for a free account from <a href="https://app.sonetel.com/register?tag=api-developer&simple=true">sonetel.com</a>.
 
-### How to install?
+### Installation
 
 `pip install sonetel`
 
-### How to use?
+## Usage
 
-Here's a simple example of a script that prints the account ID and current prepaid balance of the user's account.
+### Functions
 
+Here's a list of functions available in different packages.
+
+#### Account
+- `account.get_token()` - Get an access token to authenticate API requests. 
+- `account.get_accountid()` - Get your Sonetel account ID
+- `account.get_balance()` - Get your Sonetel prepaid balance
+
+#### Subscription
+- `subscription.buy_number()` - Buy a phone number
+- `subscription.list_all_numbers()` - List all phone numbers currently assigned to your account.
+
+### Examples
+
+1. Print your Sonetel account ID and the current prepaid balance.
 ```python
 from sonetel import account
 
@@ -54,6 +68,36 @@ balance = account.get_balance(
 print(f"Your account ID is {account_id} and your prepaid balance is {balance}.")
 ```
 
-### How to get more information?
+2. List the phone numbers available in your account
+```python
+from sonetel import account, subscription
 
-Have a look at our <a href="https://docs.sonetel.com">API documentation</a>. Please contact us at dev.support@sonetel.com if you have questions about our API.
+api_base_url = "https://public-api.sonetel.com"
+
+# get API access token
+access_token = account.get_token(
+    username = 'YOUR_SONETEL_USERNAME',
+    password='YOUR_SONETEL_PASSWORD',
+    auth_url='https://api.sonetel.com/SonetelAuth/beta/oauth/token')
+
+# Get Sonetel account ID
+account_id = account.get_accountid(
+    token=access_token,
+    base_url=api_base_url)
+
+# Get the list of phone numbers
+numList = subscription.list_all_numbers(
+    token=access_token,
+    base_url=api_base_url,
+    accountid=account_id
+)
+
+print(f"Phone number list for account {account_id}:\n")
+
+for entry in numList["response"]:
+    print(entry['phnum'])
+```
+
+## Help
+
+Have a look at our <a href="https://docs.sonetel.com">API documentation</a>. Please contact us at <a href="mailto:dev.support@sonetel.com">dev.support@sonetel.com</a> if you have questions.
