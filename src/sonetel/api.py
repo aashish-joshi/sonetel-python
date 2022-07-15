@@ -1,41 +1,66 @@
-import requests
-import re
-from json import dumps
+# Import Packages.
+try:
+    import requests
+    import re
+    from json import dumps
+    import jwt
+except ImportError as e:
+    raise ImportError(e)
 
-class Resource:
+class Account:
     """
     Use Sonetel's Python module to manage your account.
 
-    **API Documentation**: https://docs.sonetel.com/
+    Documentation: https://docs.sonetel.com/
 
     """
     __e164pattern = r'^\+?[1-9]\d{8,15}$'
 
-    def __init__(self, username: str, password: str, auth_url='https://api.sonetel.com/SonetelAuth/beta/oauth/token',
+    def __init__(self, username: str, password: str,
+                 auth_url='https://api.sonetel.com/SonetelAuth/beta/oauth/token',
                  base_url='https://public-api.sonetel.com'):
+
+        if not isinstance(username,str) or not isinstance(password,str):
+            raise TypeError
+
         self.__username = username
         self.__password = password
 
         # API URLs
-        self.auth_url = auth_url
-        self.base_url = base_url
+        self._auth_url = auth_url
+        self._base_url = base_url
 
         # Set the API access token
-        token = self.get_token()
-        self.token = token["access_token"]
+        token = self.create_token()
+        self._token = token["access_token"]
+        self._refresh_token = token["refresh_token"]
+        self._decoded_token = self._decode_token()
 
         # Account and User Information
-        self.accountid = self.account_info(return_only_accountid=True)
-        self.userid = 'userid'
+        # self._accountid = self.account_info(return_only_accountid=True)
+        self._accountid = self._decoded_token['acc_id']
+        self._userid = self._decoded_token['user_id']
 
-    def get_token(self, refresh: str = "no", grant_type: str = "password", refresh_token: str = None) -> dict:
+    def get_token(self):
+        return self._token if self._token else False
+
+    def get_username(self):
+        return self.__username if self.__username else False
+
+    def account_id(self):
+        return self._accountid if self._accountid else False
+
+    def _decode_token(self):
+        return jwt.decode(self._token, options={"verify_signature": False})
+
+    def create_token(self, refresh: str = "yes", grant_type: str = "password", refresh_token: str = None) -> dict:
         """
         Create an API access token from the user's Sonetel email address and password.
         Optionally, generate a refresh token as well. Set the ``grant_type`` to ``refresh_token`` to refresh an
         existing access token.
         **Docs**: https://docs.sonetel.com/docs/sonetel-documentation/YXBpOjExMzI3NDM3-authentication
 
-        :param refresh: Optional. Flag to control whether a refresh token is included in the response. Defaults to 'no'
+        :param refresh: Optional. Flag to control whether a refresh token is included in the response. Defaults to 'yes'
         :param grant_type: Optional. The OAuth2 grant type. Defaults to 'password'
         :param refresh_token: Optional. Pass the `refresh_token` in this field to generate a new access_token.
 
@@ -43,23 +68,23 @@ class Resource:
         """
 
         if grant_type == 'refresh_token' and refresh_token is None:
-            raise ValueError("A refresh_token is needed when grant type is refresh_token.")
+            raise ValueError("A 'refresh_token' is needed.")
 
         # Prepare the request body.
         body = f"grant_type={grant_type}&username={self.__username}&password={self.__password}&refresh={refresh}"
 
         # Add the refresh token to the request body if passed to the function
-        if refresh_token is not None:
+        if refresh_token is not None and grant_type == 'refresh_token':
             body += f"&refresh_token={refresh_token}"
 
-        auth = ('sonetel-web', 'sonetel-web')
+        auth = ('sonetel-api', 'sonetel-api')
 
         # Prepare the request headers
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
         # Send the request
         r = requests.post(
-            url=self.auth_url,
+            url=self._auth_url,
             data=body,
             headers=headers,
             auth=auth
@@ -72,7 +97,7 @@ class Resource:
             print(r.json())
             r.raise_for_status()
 
-    def account_info(self, return_only_accountid: bool = False):
+    def account_info(self):
 
         """
         Get information about Sonetel account such as the account ID, prepaid balance, currency, country, etc.
@@ -84,22 +109,19 @@ class Resource:
 
         # Prepare the request Header
         header = {
-            "Authorization": "Bearer " + self.token,
+            "Authorization": "Bearer " + self._token,
             "Content-Type": "application/json"
         }
 
         # Send the request
         r = requests.get(
-            url=f"{self.base_url}/account/",
+            url=f"{self._base_url}/account/{self._accountid}",
             headers=header)
 
         # Check the response and handle accordingly
         if r.status_code == requests.codes.ok:
             response = r.json()
-            if not return_only_accountid:
-                return response
-            else:
-                return response['response']['account_id']
+            return response
         else:
             print(r.json())
             r.raise_for_status()
@@ -115,13 +137,13 @@ class Resource:
 
         # Prepare the request Header
         header = {
-            "Authorization": "Bearer " + self.token,
+            "Authorization": "Bearer " + self._token,
             "Content-Type": "application/json"
         }
 
         # Send the request
         r = requests.get(
-            url=f"{self.base_url}/account/",
+            url=f"{self._base_url}/account/{self._accountid}",
             headers=header)
 
         # Check the response and handle accordingly
@@ -146,12 +168,12 @@ class Resource:
 
         # Prepare the request Header
         request_header = {
-            "Authorization": "Bearer " + self.token
+            "Authorization": "Bearer " + self._token
         }
 
         # Send the request
         r = requests.get(
-            url=f'{self.base_url}/account/{self.accountid}/user/',
+            url=f'{self._base_url}/account/{self._accountid}/user/',
             headers=request_header
         )
         # Check the response and handle accordingly
@@ -176,7 +198,7 @@ class Resource:
         It is best to use 'automatic' CLI as our system selects the best possible phone to be shown from the numbers
         available in your account. If you don't have a Sonetel number, then your verified mobile number is used as CLI.
 
-        :param num1: Required. The first phone number that will be called. This should be your phone number.
+        :param num1: Required. The first phone number that will be called. This should be your phone number, SIP address or Sonetel email address.
         :param num2: Required.The phone number that you wish to speak to.
         :param cli1: Optional. The caller ID shown to the first person.
         :param cli2: Optional. The caller ID shown to the second person.
@@ -188,16 +210,16 @@ class Resource:
         if re.search(self.__e164pattern, num1) and re.search(self.__e164pattern, num1):
             # ToDo:
             #  Check cost of call before connecting
-            #  Check if the CLI provided, if other than automatic, is a valid e164 number.
+            #  Get list of numbers that can be used as caller ID.
 
             # Initiate the callback
             request_header = {
-                'Authorization': 'Bearer ' + self.token,
+                'Authorization': 'Bearer ' + self._token,
                 'Content-Type': 'application/json;charset=UTF-8'
             }
 
             body = {
-                "app_id": 'PySonApp-' + self.accountid,
+                "app_id": 'PythonSonetelApp-' + str(self._accountid),
                 "call1": num1,
                 "call2": num2,
                 "show_1": cli1,
@@ -206,7 +228,7 @@ class Resource:
 
             # Send the request
             r = requests.post(
-                url=f'{self.base_url}/make-calls/call/call-back',
+                url=f'{self._base_url}/make-calls/call/call-back',
                 data=dumps(body),
                 headers=request_header
             )
@@ -239,13 +261,13 @@ class Resource:
 
         # Prepare the request Header
         request_header = {
-            "Authorization": "Bearer " + self.token,
+            "Authorization": "Bearer " + self._token,
             "Content-Type": "application/json"
         }
 
         # Send the request
         r = requests.post(
-            url=f'{self.base_url}/account/{self.accountid}/phonenumbersubscription/',
+            url=f'{self._base_url}/account/{self._accountid}/phonenumbersubscription/',
             data=dumps(body),
             headers=request_header
         )
@@ -271,13 +293,13 @@ class Resource:
 
         # Prepare the request Header
         request_header = {
-            "Authorization": "Bearer " + self.token,
+            "Authorization": "Bearer " + self._token,
             "Content-Type": "application/json"
         }
 
         # Send the request
         r = requests.get(
-            url=f'{self.base_url}/account/{self.accountid}/phonenumbersubscription/',
+            url=f'{self._base_url}/account/{self._accountid}/phonenumbersubscription/',
             headers=request_header
         )
 
@@ -298,4 +320,3 @@ class Resource:
                     return response['response']
         else:
             r.raise_for_status()
-
