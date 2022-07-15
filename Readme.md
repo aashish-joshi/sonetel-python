@@ -28,91 +28,107 @@ Use PIP to install the package.
 
 `pip install sonetel`
 
-## Usage
+## Functions
 
-### Functions
+The following functions are support at the moment. More will be added in the future.
 
-Here's a list of functions available in different packages.
+- `account_balance()` - Get the prepaid balance of the account (e.g. '10'). Pass the argument `currency=True` to get the balance with the currency appended (e.g. '10 USD')
+- `account_id()` - Returns your Sonetel account ID.
+- `account_info()` - Fetch information about your account such as company name, balance, country, timezone, daily limit and so on.
+- `account_users()` - Details of all the users in your account.
+- `callback()` - Use our Callback API to make a callback call.
+- `create_token()` - Create a new access token. A new access token is automatically created when you call the Account resource the first time.
+- `get_token()` - Get the access token being used.
+- `get_username()` - Returns the email address of the user that was used to create the token.
+- `subscription_buynum()` - Purchase a phone number. Requires a phone number to be passed. Use the `/availablephonenumber` API endpoint to see a list of phone numbers available for purchase from a country and area.
+- `subscription_listnums()` - See the details of all the phone numbers purchased by you. Pass the parameter `e164only=True` to only get a list of E.164 numbers without any metadata.
 
-#### Account
+## Examples
 
-- `account.token()` - Get an access token to authenticate API requests. Can be used to refresh an existing access token as well.
-- `account.get_account()` - Get information about your Sonetel account such as the account ID, prepaid balance, etc
-- `account.get_balance()` - Get your Sonetel prepaid balance.
-- `account.get_all_users` - Get a list of all users in your Sonetel account.
+### 1. Create an access token
 
-#### Subscription
-- `subscription.buy_number()` - Buy a phone number
-- `subscription.list_all_numbers()` - List all phone numbers currently assigned to your account.
-
-### Examples
-
-1. Print your Sonetel account ID and the current prepaid balance.
 ```python
-from sonetel import account
+import os
+from sonetel import api
 
-# get API access token
-token = account.token(
-    username = "YOUR_SONETEL_USERNAME",
-    password = "YOUR_SONETEL_PASSWORD")
+user = os.environ.get('sonetelUserName')
+pswd = os.environ.get('sonetelPassword')
 
-# Print the Sonetel account ID and current account balance.
-account_id = account.get_account(
-    token=token["access_token"],
-    return_only_accountid=True)
+s = api.Account(username=user,password=pswd)
 
-balance = account.get_balance(
-    token=token["access_token"], 
-    currency=True)
-
-print(f"Your account ID is {account_id} and your prepaid balance is {balance}.")
+print(s.get_token())
 ```
 
-2. List the phone numbers available in your account
+### 2. Print your Sonetel account ID and the current prepaid balance. 
+
 ```python
-from sonetel import account, subscription
+import os
+from sonetel import api
 
-# get API access token
-token = account.token(
-    username = "YOUR_SONETEL_USERNAME",
-    password = "YOUR_SONETEL_PASSWORD")
+user = os.environ.get('sonetelUserName')
+pswd = os.environ.get('sonetelPassword')
 
-# Get Sonetel account ID
-account_id = account.get_account(
-    token=token["access_token"],
-    return_only_accountid=True)
+s = api.Account(username=user,password=pswd)
 
-# Get the list of phone numbers
-numList = subscription.list_all_numbers(
-    token=token["access_token"],
-    accountid=account_id)
-
-print(f"Phone number list for account {account_id}:\n")
-
-for entry in numList:
-    print(entry["phnum"])
+print(f"Your account ID is {s.account_id()} and your prepaid balance is {s.account_balance()}.")
 ```
 
-### Storing your credentials
+### 3. List the phone numbers available in your account
 
-**IMPORTANT** It is critical that you keep your Sonetel login credentials safe in order to avoid any misuse of your account.
+```python
+import os
+from sonetel import api
 
-For this reason, we don't recommend hard coding them into scripts. You can add them to your operating system's environment variables and use Python's OS module to fetch the details.
+user = os.environ.get('sonetelUserName')
+pswd = os.environ.get('sonetelPassword')
+
+s = api.Account(username=user,password=pswd)
+
+print(s.subscription_listnums(e164only=True))
+```
+
+### 4. Make a callback call
+
+When making a callback call, `num1` is the destination where you will first answer the call before we call `num2`. This can be your mobile number, a SIP address or your Sonetel email address. 
+
+If you set `num1` as your Sonetel email address, then the call will be handled as per your incoming call settings.
+
+```python
+import os
+from sonetel import api
+
+user = os.environ.get('sonetelUserName')
+pswd = os.environ.get('sonetelPassword')
+
+s = api.Account(username=user,password=pswd)
+
+result = s.callback(
+    num1="YOUR_NUMBER_OR_ADDRESS",
+    num2="NUMBER_TO_CALL",
+)
+print(result)
+```
+
+## Storing your credentials
+
+Please your credentials safe in order to avoid any misuse of your account. For this reason, it isn't recommend to hard code them into scripts.
+
+You can add them to your operating system's environment variables and use Python's `os` module to fetch them.
 
 Assuming the username and password are stored in environment variables named `sonetelUserName` and `sonetelPassword` respectively, here's how you can access them from a script:
 
 ```python
 import os
-from sonetel import account
+from sonetel import api
 
 user = os.environ.get('sonetelUserName')
 pswd = os.environ.get('sonetelPassword')
 
-token = account.token(
-    username = user,
-    password=pswd)
+s = api.Account(username=user,password=pswd)
+
+print(s.account_id())
 ```
 
 ## Help
 
-Have a look at our <a href="https://docs.sonetel.com">API documentation</a>. Please contact us at <a href="mailto:dev.support@sonetel.com">dev.support@sonetel.com</a> if you have questions.
+Have a look at the <a href="https://docs.sonetel.com">API documentation</a>.
