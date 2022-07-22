@@ -191,7 +191,10 @@ class Account:
 
         **Number Format:**\n
         It is recommended that both the phone numbers (num1 and num2) be entered in the international E164 format with a
-        leading +. For example, if you want to call a US number (212) 555-1234, it should be set as `'+12125551234'`.
+        leading +. For example, if you want to call a US number (212) 555-1234, it should be set as `+12125551234`.
+
+        However you can also provide SIP addresses. Additionally, `num1` can be your Sonetel username - this will make
+        sure that the incoming call to you is handled as per your incoming settings defined in the app.
 
         **Caller ID:**\n
         It is best to use 'automatic' CLI as our system selects the best possible phone to be shown from the numbers
@@ -200,13 +203,13 @@ class Account:
         :param num1: Required. The first phone number that will be called.
         This should be your phone number, SIP address or Sonetel email address.
         :param num2: Required.The phone number that you wish to speak to.
-        :param cli1: Optional. The caller ID shown to the first person.
-        :param cli2: Optional. The caller ID shown to the second person.
+        :param cli1: Optional. The caller ID shown to the first person. Defaults to automatic.
+        :param cli2: Optional. The caller ID shown to the second person. Defaults to automatic.
 
         :return: Return the status code and message as a dict.
         """
 
-        # Check if num1 and num2 are in the +NUMBER E164 format.
+        # Check if num1 and num2 are defined.
         if num1 and num1:
             # ToDo:
             #  1. Check cost of call before connecting
