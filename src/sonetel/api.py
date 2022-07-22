@@ -11,16 +11,15 @@ class Account:
     """
     Use Sonetel's Python module to manage your account.
 
-    Documentation: https://docs.sonetel.com/
+    API documentation: https://docs.sonetel.com/
 
     """
-    __e164pattern = r'^\+?[1-9]\d{8,15}$'
 
     def __init__(self, username: str, password: str,
                  auth_url='https://api.sonetel.com/SonetelAuth/beta/oauth/token',
                  base_url='https://public-api.sonetel.com'):
 
-        if not isinstance(username,str) or not isinstance(password,str):
+        if not isinstance(username, str) or not isinstance(password, str):
             raise TypeError
 
         self.__username = username
@@ -103,7 +102,6 @@ class Account:
         Get information about Sonetel account such as the account ID, prepaid balance, currency, country, etc.
         **Docs**: https://docs.sonetel.com/docs/sonetel-documentation/b3A6MTUyNTkwNTM-get-your-account-information
 
-        :param return_only_accountid: Optional. Returns only the account ID string if set to true. Else, returns the complete JSON response.
         :return: A dict with the the Sonetel account details.
         """
 
@@ -160,7 +158,8 @@ class Account:
     # Fetch details of all users in account
     def account_users(self) -> list:
         """
-        Get a list of all the users in the Sonetel account along with their settings such as title, email, password status, etc.
+        Get a list of all the users in the Sonetel account along with their settings
+        such as title, email, password status, etc.
         **Docs**: https://docs.sonetel.com/docs/sonetel-documentation/b3A6MTY4MzEyMDQ-list-all-users
 
         :return: Returns a list containing the user information
@@ -192,25 +191,29 @@ class Account:
 
         **Number Format:**\n
         It is recommended that both the phone numbers (num1 and num2) be entered in the international E164 format with a
-        leading +. For example, if you want to call a US number (212) 555-1234, it should be set as `'+12125551234'`.
+        leading +. For example, if you want to call a US number (212) 555-1234, it should be set as `+12125551234`.
+
+        However you can also provide SIP addresses. Additionally, `num1` can be your Sonetel username - this will make
+        sure that the incoming call to you is handled as per your incoming settings defined in the app.
 
         **Caller ID:**\n
         It is best to use 'automatic' CLI as our system selects the best possible phone to be shown from the numbers
         available in your account. If you don't have a Sonetel number, then your verified mobile number is used as CLI.
 
-        :param num1: Required. The first phone number that will be called. This should be your phone number, SIP address or Sonetel email address.
+        :param num1: Required. The first phone number that will be called.
+        This should be your phone number, SIP address or Sonetel email address.
         :param num2: Required.The phone number that you wish to speak to.
-        :param cli1: Optional. The caller ID shown to the first person.
-        :param cli2: Optional. The caller ID shown to the second person.
+        :param cli1: Optional. The caller ID shown to the first person. Defaults to automatic.
+        :param cli2: Optional. The caller ID shown to the second person. Defaults to automatic.
 
         :return: Return the status code and message as a dict.
         """
 
-        # Check if num1 and num2 are in the +NUMBER E164 format.
-        if re.search(self.__e164pattern, num1) and re.search(self.__e164pattern, num1):
+        # Check if num1 and num2 are defined.
+        if num1 and num1:
             # ToDo:
-            #  Check cost of call before connecting
-            #  Get list of numbers that can be used as caller ID.
+            #  1. Check cost of call before connecting
+            #  2. Get list of numbers that can be used as caller ID.
 
             # Initiate the callback
             request_header = {
@@ -241,16 +244,17 @@ class Account:
                 print(r.json())
                 r.raise_for_status()
         else:
-            raise ValueError('num1 & num2 are mandatory and should be in the international +NUMBER format.')
+            raise ValueError('num1 & num2 are mandatory.')
 
     # Create a phone number subscription
     def subscription_buynum(self, number: str) -> dict:
         """
-        Buy a phone number that is available. Numbers that are available for purchase can be checked from the ``/availablephonenumber`` API endpoint.
+        Buy a phone number that is available. Numbers that are available for purchase can be checked
+        from the ``/availablephonenumber`` API endpoint.
 
         **DOCS**: https://docs.sonetel.com/docs/sonetel-documentation/YXBpOjE2MjQ3MzI4-phone-numbers
 
-        :param number: the phone number to add to your account.
+        :param number: the phone number you want to purchase.
         :return: Dict containing the response in case of success.
         """
 
