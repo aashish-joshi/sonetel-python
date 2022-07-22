@@ -36,7 +36,6 @@ class Account:
         self._decoded_token = self._decode_token()
 
         # Account and User Information
-        # self._accountid = self.account_info(return_only_accountid=True)
         self._accountid = self._decoded_token['acc_id']
         self._userid = self._decoded_token['user_id']
 
@@ -46,7 +45,10 @@ class Account:
     def get_username(self):
         return self.__username if self.__username else False
 
-    def account_id(self):
+    def get_userid(self):
+        return self._userid if self._userid else False
+
+    def get_accountid(self):
         return self._accountid if self._accountid else False
 
     def _decode_token(self):
@@ -124,7 +126,7 @@ class Account:
             print(r.json())
             r.raise_for_status()
 
-    def account_balance(self, currency: bool = False) -> str:
+    def get_balance(self, currency: bool = False) -> str:
         """
         Get the prepaid account balance. Example, '3.74 USD' or '3.74'.
         **Docs**: https://docs.sonetel.com/docs/sonetel-documentation/b3A6MTUyNTkwNTM-get-your-account-information
@@ -147,10 +149,9 @@ class Account:
         # Check the response and handle accordingly
         if r.status_code == requests.codes.ok:
             response = r.json()
-            if currency is False:
-                return response['response']['credit_balance']
-            else:
+            if currency:
                 return response['response']['credit_balance'] + ' ' + response['response']['currency']
+            return response['response']['credit_balance']
         else:
             print(r.json())
             r.raise_for_status()
