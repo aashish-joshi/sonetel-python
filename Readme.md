@@ -32,8 +32,8 @@ Use PIP to install the package.
 
 The following functions are support at the moment. More will be added in the future.
 
-- `account_balance()` - Get the prepaid balance of the account (e.g. '10'). Pass the argument `currency=True` to get the balance with the currency appended (e.g. '10 USD')
-- `account_id()` - Returns your Sonetel account ID.
+- `get_balance()` - Get the prepaid balance of the account (e.g. '10'). Pass the argument `currency=True` to get the balance with the currency appended (e.g. '10 USD')
+- `get_accountid()` - Returns your Sonetel account ID.
 - `account_info()` - Fetch information about your account such as company name, balance, country, timezone, daily limit and so on.
 - `account_users()` - Details of all the users in your account.
 - `callback()` - Use our Callback API to make a callback call.
@@ -70,7 +70,7 @@ pswd = os.environ.get('sonetelPassword')
 
 s = api.Account(username=user,password=pswd)
 
-print(f"Your account ID is {s.account_id()} and your prepaid balance is {s.account_balance()}.")
+print(f"Your account ID is {s.get_accountid()} and your prepaid balance is {s.get_balance()}.")
 ```
 
 ### 3. List the phone numbers available in your account
@@ -126,7 +126,7 @@ pswd = os.environ.get('sonetelPassword')
 
 s = api.Account(username=user,password=pswd)
 
-print(s.account_id())
+print(s.get_accountid())
 ```
 
 ## Help
