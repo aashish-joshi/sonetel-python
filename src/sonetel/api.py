@@ -321,7 +321,8 @@ class Account:
                         for entry in response['response']:
                             nums.append(entry['phnum'])
                         return nums
-                else:
-                    return response['response']
+                    else:
+                        return response['response']
+                return response['response']
         else:
             r.raise_for_status()
