@@ -20,9 +20,9 @@
 
 ## Build
  + Follow [these instructions](https://packaging.python.org/en/latest/tutorials/packaging-projects/) to get the latest build tools.
- + Clone the main repository
- + `cd` into the cloned directory
- + run `py -m build` to build the module in the `dist/` folder.
+ + `git clone https://github.com/aashish-joshi/sonetel-python.git`
+ + `cd sonetel-python`.
+ + `py -m build`
 
 ## Install
 To install the module built locally:
