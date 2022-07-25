@@ -140,4 +140,4 @@ print(s.get_accountid())
 
 For help with the Sonetel API, have a look at the <a href="https://docs.sonetel.com">API documentation</a>.
 
-If you have an issue with the module, please report a ticket.
+If you have an issue with the module, please [report an issue](https://github.com/aashish-joshi/sonetel-python/issues) on GitHub.
