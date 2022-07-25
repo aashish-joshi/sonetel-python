@@ -2,6 +2,11 @@
 
 All notable changes to the Sonetel Python Module are tracked in this file.
 
+## [0.1.2] - 25-07-2022
+
+### Changes
++ Fix issue in `subscription_listnums()` that doesn't return anything when `e164only=False`. 
+
 ## [0.1.1] - 22-07-2022
 
 ### Added
