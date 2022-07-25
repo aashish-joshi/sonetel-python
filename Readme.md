@@ -18,15 +18,22 @@
   </p>
 </div>
 
+## Introduction
+This is a simple python wrapper to use Sonetel's communication APIs.
+
 ## Getting Started
 
-To use Sonetel's APIs you first need to sign up for a free account. Get a free account from <a href="https://app.sonetel.com/register?tag=api-developer&simple=true">sonetel.com</a>.
+To use the module, you need a Sonetel account. If you don't already have one, get a free account from <a href="https://app.sonetel.com/register?tag=api-developer&simple=true">sonetel.com</a>.
 
 ### Installation
 
-Use PIP to install the package.
+#### PIP
+Run the following command to install from pip.
 
 `pip install sonetel`
+
+#### Git
+To get the latest features, clone a specific [tag](https://github.com/aashish-joshi/sonetel-python/tags) and [follow these instructions](https://packaging.python.org/en/latest/tutorials/packaging-projects/) to build the module locally.
 
 ## Functions
 
@@ -111,7 +118,7 @@ print(result)
 
 ## Storing your credentials
 
-Please your credentials safe in order to avoid any misuse of your account. For this reason, it isn't recommend to hard code them into scripts.
+Please keep your credentials safe to avoid any misuse of your account. Do not hard code them into scripts or save them in files that are saved in any form of version control.
 
 You can add them to your operating system's environment variables and use Python's `os` module to fetch them.
 
@@ -131,4 +138,6 @@ print(s.get_accountid())
 
 ## Help
 
-Have a look at the <a href="https://docs.sonetel.com">API documentation</a>.
+For help with the Sonetel API, have a look at the <a href="https://docs.sonetel.com">API documentation</a>.
+
+If you have an issue with the module, please report a ticket.
